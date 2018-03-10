@@ -38,41 +38,75 @@ NULL
 #' model <- ADE(target ~., train, specs)
 #'
 #' preds <- predict(model, test)
-#' 
+#'
 #'
 #' @export
 setMethod("predict",
           signature("ADE"),
           function(object, newdata) {
-            seq. <- seq_len(nrow(newdata))
+            data_size <- nrow(newdata)
+            seq. <- seq_len(data_size)
+            N <- object@base_ensemble@N
 
             Y_hat <- predict(object@base_ensemble, newdata)
+            Y_hat_recent <- predict(object@base_ensemble, object@recent_series)
+            Y_hat_recent <- utils::tail(Y_hat_recent, object@lambda)
+
+            Y_hat_extended <- rbind.data.frame(Y_hat_recent, Y_hat)
+
             Y <- get_y(newdata, object@form)
 
-            E_hat <- lapply(object@meta_model,
-                            function(o)
-                              predict(o, newdata)$predictions)
+            E_hat <-
+              lapply(object@meta_model,
+                     function(o) {
+                       meta_predict(o, newdata, "randomforest")
+                     })
+            names(E_hat) <- colnames(Y_hat)
 
-            E_hat <- as.data.frame(E_hat)
+            E_hat <- abs(as.data.frame(E_hat))
 
-            W <- t(apply(E_hat, 1, model_weighting, na.rm = TRUE))
-
-            Y_hat_recent <- predict(object@base_ensemble, object@recent_series)
             Y_rs <- get_y(object@recent_series, object@form)
+            Y_rs <- utils::tail(Y_rs, object@lambda)
 
-            C <-
-              build_committee(
-                rbind.data.frame(Y_hat_recent, Y_hat),
-                c(Y_rs, Y),
-                lambda = object@lambda,
-                omega = object@omega
-              )
+            if (!object@all_models) {
+              Y_rs <- get_y(object@recent_series, object@form)
+              Y_rs <- utils::tail(Y_rs, object@lambda)
 
-            C <- C[-seq_len(object@lambda)]
+              C <-
+                build_committee(
+                  rbind.data.frame(Y_hat_recent, Y_hat),
+                  c(Y_rs, Y),
+                  lambda = object@lambda,
+                  omega = object@omega)
+
+              C <- C[-seq_len(object@lambda)]
+              C <- lapply(C, unname)
+            } else
+              C <- NULL
+
+            if (!object@all_models) {
+              W <- matrix(0., ncol = N, nrow = data_size)
+              for (j in seq.) {
+                W_j <- E_hat[j, C[[j]]]
+                W_j <- model_weighting(W_j, object@aggregation)
+
+                W[j,  C[[j]]] <- W_j
+                W[j, -C[[j]]] <- 0.
+              }
+              colnames(W) <- colnames(Y_hat)
+            } else {
+              W <- apply(E_hat, 1, model_weighting, trans = object@aggregation)
+              W <- t(W)
+            }
 
             if (object@select_best) {
               W <- select_best(W)
               C <- NULL
+            }
+
+            if (object@sequential_reweight) {
+              ssimilarity <- sliding_similarity(Y_hat_extended, object@lambda)
+              W <- sequential_reweighting(ssimilarity, W)
             }
 
             y_hat <-
@@ -115,6 +149,9 @@ setMethod("predict",
             seq. <- seq_len(nrow(newdata))
 
             Y_hat <- predict(object@base_ensemble, newdata)
+            #Y_hat <-
+            #  dual_perturb_combine(object@base_ensemble, newdata, 200)
+
             Y <- get_y(newdata, object@form)
 
             Y_hat_recent <-
@@ -130,6 +167,11 @@ setMethod("predict",
 
             scores$top_models <- scores$top_models[-seq_len(object@lambda)]
             scores$model_scores <- scores$model_scores[-seq_len(object@lambda), ]
+
+            if (object@select_best) {
+              scores$model_scores <- select_best(scores$model_scores)
+              C <- NULL
+            }
 
             y_hat <-
               combine_predictions(

@@ -4,7 +4,8 @@
 \alias{ADE}
 \title{Arbitrated Dynamic Ensemble}
 \usage{
-ADE(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE)
+ADE(form, data, specs, lambda = 50, omega = 0.5, select_best = FALSE,
+  all_models = FALSE, aggregation = "linear", sequential_reweight = FALSE)
 }
 \arguments{
 \item{form}{formula;}
@@ -31,6 +32,25 @@ Defaults to .5 according to empirical experiments;}
 a single base model is picked to make a prediction. The picked
 model is the one that has the lowest loss prediction from
 the meta models. Defaults to FALSE;}
+
+\item{all_models}{Logical. If true, at each prediction time,
+all base models are picked to make a prediction. The
+models are weighted according to their predicted loss
+and the \code{aggregation} function. Defaults to FALSE;}
+
+\item{aggregation}{Type of aggregation used to combine the
+predictions of the base models. The options are:
+\describe{
+ \item{softmax}{default}
+ \item{erfc}{the complementary Gaussian error function}
+ \item{linear}{a linear scaling}
+}}
+
+\item{sequential_reweight}{Besides ensemble heterogeneity we encourage diversity
+explicitly during the aggregation of the output of experts.
+This is achieved by taking into account not only predictions
+of performance produced by the arbiters, but also the
+correlation among experts in a recent window of observations.}
 }
 \description{
 Arbitrated Dynamic Ensemble (ADE) is an ensemble approach
