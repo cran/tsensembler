@@ -108,7 +108,7 @@ merging_in_experts <-
 
 #' Merge across sub-ensembles
 #'
-#' @param predict_info data from ...
+#' @param predict_info output of \strong{hat_info} function
 #' @param FUN function used to combine the models in each
 #' subset.
 #' @param object constructive aggregation class object
@@ -203,7 +203,7 @@ OOB_Chat <-
                   trans = "linear")
 
     OOB_C_hat <-
-      merging_in_experts(C = object@committee_set,
+      merging_in_experts(C = object@committee_set$C,
                          Y_hat = OOB_Y_hat,
                          W = OOB_W,
                          FUN = object@aggregate_subsets)

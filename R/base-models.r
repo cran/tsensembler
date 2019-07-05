@@ -1,3 +1,204 @@
+#' Fitting an ARIMA model
+#' Using function \strong{auto.arima} from forecast package
+#'
+#' @param y time series struture after applying
+#' function \strong{embed_timeseries}
+#'
+#' @param form formula
+#'
+#' @keywords internal
+#'
+#' @export
+bm_arima <-
+  function(y, form) {
+    tm_ids <- c(1, grep("Tm", colnames(y)))
+    train_xreg <- as.matrix(subset(y, select = -tm_ids))
+
+    y <- get_y(y, form)
+    model <- tryCatch(forecast::auto.arima(y = y, xreg = train_xreg),
+                      error = function(e) NULL)
+    if (is.null(model)) {
+      model <- forecast::Arima(y, order = c(0,1,0))
+    }
+    model$form <- form
+
+    model
+  }
+
+
+#' Fitting an Exponential Smoothing model
+#' Using function \strong{ets} from forecast package
+#'
+#' @param y time series struture after applying
+#' function \strong{embed_timeseries}
+#'
+#' @param form formula
+#'
+#' @keywords internal
+#'
+#' @export
+bm_ets <-
+  function(y, form) {
+    y <- get_y(y, form)
+    utils::capture.output(model <- forecast::ets(y = y))
+
+    model$form <- form
+
+    model
+  }
+
+
+#' Predict function for a model created from bm_arima
+#'
+#' @param model model created using \strong{bm_arima} function
+#'
+#' @param test test data created using \strong{embed_timeseries} function
+#'
+#' @keywords internal
+#'
+#' @export
+arima_predict <-
+  function(model,test) {
+
+    tm_ids <- c(1, grep("Tm", colnames(test)))
+    test_xreg <- as.matrix(subset(test, select = -tm_ids))
+
+    y <- get_y(test, model$form)
+
+    preds <- tryCatch(as.vector(forecast::Arima(y = y, model=model, xreg = test_xreg)$fitted),
+                      error = function(e) NA)
+
+    if (is.na(preds[1])) {
+      preds <- rep(mean(y), times = length(y))
+    }
+
+    preds
+  }
+
+#' Predict function for a model created from bm_ets
+#'
+#' @param model model created using \strong{bm_ets} function
+#'
+#' @param test test data created using \strong{embed_timeseries} function
+#'
+#' @keywords internal
+#'
+#' @export
+ets_predict <-
+  function(model,test) {
+    y <- get_y(test, model$form)
+
+    preds <- tryCatch(forecast::ets(y = y, model = model),
+                      error = function(e) NA)
+
+    if (is.na(preds[1])) {
+      trainset <- model$x
+      predsf <- vnapply(1:length(y), function(j) {
+        trainset <- c(trainset, y[seq_len(j) - 1])
+        pforecast <- forecast::ets(trainset,1)$mean
+
+        as.vector(pforecast)
+      })
+    } else {
+      predsf <- as.vector(preds$fitted)
+    }
+
+    as.vector(predsf)
+  }
+
+#' Fitting an tbats model
+#' Using function \strong{tbats} from forecast package
+#'
+#' @param y time series struture after applying
+#' function \strong{embed_timeseries}
+#'
+#' @param form formula
+#'
+#' @keywords internal
+#'
+#' @export
+bm_tbats <-
+  function(y, form) {
+    y <- get_y(y, form)
+    utils::capture.output(model <- forecast::tbats(y = y))
+    model$form <- form
+
+    model
+  }
+
+#' Predict function for a model created from bm_tbats
+#'
+#' @param model model created using \strong{bm_tbats} function
+#'
+#' @param test test data created using \strong{embed_timeseries} function
+#'
+#' @keywords internal
+#'
+#' @export
+tbats_predict <-
+  function(model,test) {
+    y <- get_y(test, model$form)
+
+    preds <- tryCatch(as.vector(forecast::tbats(y = y, model = model)$fitted.values),
+                      error = function(e) {
+                        rep(mean(model$y, times = length(y)))
+                      })
+
+    preds
+  }
+
+#' Classical time series models
+#'
+#' Fit classical time series models, such as ARIMA
+#' or exponential smoothing, to a time series
+#'
+#' @param form formula
+#' @param data training data (see example)
+#' @param lpars list of parameters (see example)
+#'
+#' @examples
+#'
+#' data("water_consumption")
+#'
+#' x <- embed_timeseries(water_consumption, 5)[1:100,]
+#'
+#' form <- target ~.
+#' lpars <-
+#' list(bm_timeseries = list(model = c("bm_arima","bm_tbats")))
+#'
+#' bmodels <- bm_timeseries(form, x, lpars)
+#'
+#' @keywords internal
+#'
+#' @export
+bm_timeseries <-
+  function(form, data, lpars) {
+    Y <- get_y(data, form)
+
+    if (is.null(lpars)) {
+      lpars$bm_timeseries$model <- "bm_arima"
+    }
+
+    nmodels <- length(lpars$timeseries$model)
+
+    j <- 0
+    ensemble <- vector("list", nmodels)
+    mnames <- character(nmodels)
+    for (modeltype in lpars$bm_timeseries$model) {
+        j <- j + 1L
+
+        mnames[j] <- gsub("bm_","",modeltype)
+
+        utils::capture.output(ensemble[[j]] <-
+          do.call(modeltype, list(y = data, form = form)))
+
+    }
+    names(ensemble) <- mnames
+
+    ensemble
+  }
+
+
 #' Fit Gaussian Process models
 #'
 #' Learning a Gaussian Process model from training
@@ -48,7 +249,7 @@ bm_gaussianprocess <-
       for (tolerance in lpars$bm_gaussianprocess$tol) {
         j <- j + 1L
 
-        mnames[j] <- paste("gp", kernel, "krnl", tolerance, "tl", sep = "_")
+        mnames[j] <- paste("gp", kernel, "kernel", tolerance, "tl", sep = "_")
         cat(mnames[j],"\n")
         if (!is.null(lpars$rm_ids)) {
           if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -113,7 +314,7 @@ bm_ppr <-
     for (nterm in lpars$bm_ppr$nterms) {
       for (smoother in lpars$bm_ppr$sm.method) {
         j <- j + 1L
-        mnames[j] <- paste0("ppr_", nterm, "nterms_", smoother)
+        mnames[j] <- paste0("ppr_", nterm, "_nterms_", smoother,"_method")
         cat(mnames[j],"\n")
         if (!is.null(lpars$rm_ids)) {
           if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -121,7 +322,6 @@ bm_ppr <-
             data <- data[-rm_ids, ]
           }
         }
-
 
         ensemble[[j]] <-
           ppr(form,
@@ -164,50 +364,54 @@ bm_glm <-
     if (is.null(lpars$bm_glm))
       lpars$bm_glm <- list()
 
-    if (is.null(lpars$bm_glm$alpha))
+    if (is.null(lpars$bm_glm$alpha)) {
       lpars$bm_glm$alpha <- c(0, 1)
+    }
+
+    if (is.null(lpars$bm_glm$family)) {
+      lpars$bm_glm$family <- "gaussian"
+    }
 
     X <- stats::model.matrix(form, data)
     Y <- get_y(data, form)
 
-    nmodels <- length(lpars$bm_glm$alpha)
+    nmodels <-
+      length(lpars$bm_glm$alpha) *
+      length(lpars$bm_glm$family)
+
 
     j <- 0
     ensemble <- vector("list", nmodels)
     mnames <- character(nmodels)
     for (alpha in lpars$bm_glm$alpha) {
-      j <- j + 1L
+      for (fam in lpars$bm_glm$family) {
+        j <- j + 1L
 
-      if (alpha == 0) {
-        mnames[j] <- "glm_ridge"
-      } else if (alpha == 1) {
-        mnames[j] <- "glm_lasso"
-      } else {
-        mnames[j] <- paste("glm_enet", alpha, sep = "_")
-      }
-      cat(mnames[j],"\n")
-
-      if (!is.null(lpars$rm_ids)) {
-        if (mnames[j] %in% names(lpars$rm_ids)) {
-          cat("ss")
-          rm_ids <- lpars$rm_ids[[mnames[j]]]
-          X <- X[-rm_ids, ]
-          Y <- Y[-rm_ids]
+        if (alpha == 0) {
+          mnames[j] <- "glm_ridge"
+        } else if (alpha == 1) {
+          mnames[j] <- "glm_lasso"
+        } else {
+          mnames[j] <- paste("glm_enet", alpha, sep = "_")
         }
+        cat(mnames[j],"\n")
+
+        mnames[j] <- paste(mnames[j],fam,sep="_")
+
+        m.all <- glmnet(X, Y, alpha = alpha, family = fam)
+        ensemble[[j]] <-
+          glmnet(X,
+                 Y,
+                 alpha = alpha,
+                 lambda = min(m.all$lambda),
+                 family = fam)
       }
-
-      m.all <- glmnet(X, Y, alpha = alpha)
-      ensemble[[j]] <-
-        glmnet(X,
-               Y,
-               alpha = alpha,
-               lambda = min(m.all$lambda))
-
     }
     names(ensemble) <- mnames
 
     ensemble
   }
+
 
 #' Fit Generalized Boosted Regression models
 #'
@@ -348,7 +552,7 @@ bm_randomforest <-
       for (mtry in lpars$bm_randomforest$mtry) {
         j <- j + 1L
 
-        mnames[j] <- paste0("rf_n", num.trees, "m", mtry)
+        mnames[j] <- paste0("rf_n_", num.trees)#, "m_", mtry)
         cat(mnames[j],"\n")
         if (!is.null(lpars$rm_ids)) {
           if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -422,7 +626,7 @@ bm_cubist <-
       for (neighbors in lpars$bm_cubist$neighbors) {
         j <- j + 1L
 
-        mnames[j] <- paste0("cub_", ncom, "it", neighbors, "nn")
+        mnames[j] <- paste0("cub_", ncom, "it", neighbors, "_nn")
         cat(mnames[j],"\n")
 
         if (!is.null(lpars$rm_ids)) {
@@ -495,7 +699,7 @@ bm_mars <-
         for (thresh in lpars$bm_mars$thresh) {
           j <- j + 1L
 
-          mnames[j] <- paste0("mars_nk", nk, "_d", degree, "t", thresh)
+          mnames[j] <- paste0("mars_nk_", nk, "_d_", degree, "_t_", thresh)
           cat(mnames[j],"\n")
           if (!is.null(lpars$rm_ids)) {
             if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -576,7 +780,7 @@ bm_svr <-
         for (C in lpars$bm_svr$C) {
           j <- j + 1L
 
-          mnames[j] <- paste0("svm_", kernel, "g", epsilon, "c", C)
+          mnames[j] <- paste0("svm_", kernel, "_g_", epsilon, "c_", C)
           cat(mnames[j],"\n")
           if (!is.null(lpars$rm_ids)) {
             if (mnames[j] %in% names(lpars$rm_ids)) {
@@ -660,7 +864,7 @@ bm_ffnn <-
         for (decay in lpars$bm_ffnn$decay) {
           j <- j + 1L
 
-          mnames[j] <- paste0("nnet_s", size, "_d", decay, "m", maxit)
+          mnames[j] <- paste0("nnet_s_", size, "_d_", decay, "_m_", maxit)
           cat(mnames[j],"\n")
           if (!is.null(lpars$rm_ids)) {
             if (mnames[j] %in% names(lpars$rm_ids)) {

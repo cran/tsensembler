@@ -16,7 +16,7 @@ Utility function to compute mean squared error (MSE)
 }
 \seealso{
 Other error/performance functions: \code{\link{ae}},
-  \code{\link{mae}}, \code{\link{mase}},
-  \code{\link{r_squared}}, \code{\link{se}}
+  \code{\link{se}}
 }
+\concept{error/performance functions}
 \keyword{internal}

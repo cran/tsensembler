@@ -13,6 +13,11 @@
 #'
 #' @param lfun loss function for metalearning. Defaults to ae -- absolute error.
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @family out-of-bag functions
 #'
 #' @keywords internal
@@ -25,17 +30,25 @@
 #' }
 #'
 #' @export
-intraining_estimations <- function(train, test, form, specs, lfun) {
+intraining_estimations <-
+  function(train, test, form, specs, lfun, num_cores) {
+    utils::capture.output(M <- build_base_ensemble(form, train, specs, num_cores))
+    Y <- get_y(test, form)
+    Y_tr <- get_y(train, form)
 
-  utils::capture.output(M <- build_base_ensemble(form, train, specs))
-  Y <- get_y(test, form)
-  Y_tr <- get_y(train, form)
+    Y_hat <- predict(M, test)
+    model_loss <-
+      base_models_loss(
+        Y_hat = Y_hat,
+        Y = Y,
+        lfun = lfun,
+        y_tr = Y_tr
+      )
 
-  Y_hat <- predict(M, test)
-  model_loss <- base_models_loss(Y_hat, Y, lfun, Y_tr)
-
-  list(mloss = model_loss, oob = test, Y_hat = Y_hat)
-}
+    list(mloss = model_loss,
+         oob = test,
+         Y_hat = Y_hat)
+  }
 
 #' Out-of-bag predictions
 #'
@@ -73,7 +86,7 @@ intraining_predictions <- function(train, test, form, specs) {
 #'
 #' @seealso \code{\link{intraining_estimations}}
 #' function to use as \strong{FUN} parameter.
-#' 
+#'
 #' @keywords internal
 #'
 #' @export
@@ -98,12 +111,12 @@ blocked_prequential <- function(x, nfolds, FUN, .rbind = TRUE, ...) {
 
 
 #' Holdout
-#' 
+#'
 #' @param x data to split into \code{nfolds} blocks;
 #' @param beta ratio of observations for training
 #' @param FUN function to apply to train/test split
 #' @param ... further arguments to FUN
-#' 
+#'
 #' @keywords internal
 #'
 #' @export

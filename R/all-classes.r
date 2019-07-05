@@ -366,8 +366,10 @@ model_specs <-
         "bm_pls_pcr",
         "bm_prophet",
         "bm_ets",
-        "bm_auto_arima",
-        "bm_xgb"
+        "bm_timeseries",
+        "bm_xgb",
+        "bm_deepffnn",
+        "bm_lstm"
         )
 
     if (!all(learner %in% .available_models))
@@ -497,6 +499,8 @@ setMethod("show",
 #'
 #' @slot out_of_bag Out of bag observations used to train arbiters.
 #'
+#' @slot meta_model_type meta model to use -- defaults to random forest
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
 #' Forecasting" to appear at: Joint European Conference on Machine Learning and
@@ -553,7 +557,8 @@ setClass("ADE",
                    aggregation = "character",
                    sequential_reweight = "logical",
                    recent_series = "data.frame",
-                   out_of_bag = "OptionalList")
+                   out_of_bag = "OptionalList",
+                   meta_model_type = "character")
 )
 
 #' Arbitrated Dynamic Ensemble
@@ -614,6 +619,15 @@ setClass("ADE",
 #' of performance produced by the arbiters, but also the
 #' correlation among experts in a recent window of observations.
 #'
+#' @param meta_loss_fun Besides
+#'
+#' @param meta_model_type meta model to use -- defaults to random forest
+#'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Pinto, Fabio;
 #' and Soares, Carlos. "Arbitrated Ensemble for Time Series
 #' Forecasting" to appear at: Joint European Conference on Machine Learning and
@@ -665,7 +679,10 @@ setClass("ADE",
            select_best = FALSE,
            all_models = FALSE,
            aggregation = "linear",
-           sequential_reweight = FALSE) {
+           sequential_reweight = FALSE,
+           meta_loss_fun = ae,
+           meta_model_type = "randomforest",
+           num_cores = 1) {
 
     if (select_best && is.numeric(omega))
       warning(
@@ -700,7 +717,9 @@ setClass("ADE",
         train = data,
         specs = specs,
         lambda = lambda,
-        lfun = ae)
+        lfun = meta_loss_fun,
+        meta_model_type = meta_model_type,
+        num_cores = num_cores)
 
     methods::new(
       "ADE",
@@ -715,7 +734,8 @@ setClass("ADE",
       aggregation = aggregation,
       sequential_reweight = sequential_reweight,
       recent_series = M$recent_series,
-      out_of_bag = M$OOB
+      out_of_bag = M$OOB,
+      meta_model_type = meta_model_type
     )
   }
 
@@ -875,11 +895,11 @@ ade_hat <- function(y_hat, Y_hat, Y_committee, E_hat) {
 #' specs <- model_specs(
 #'  c("bm_ppr", "bm_svr"),
 #'  list(bm_ppr = list(nterms = c(2, 4)),
-#'       bm_svr = list(kernel = c("vanilladot", "polydot"), C = c(1,5)))
+#'       bm_svr = list(kernel = c("vanilladot"), C = c(1,5)))
 #' )
 #'
 #' data("water_consumption")
-#' train <- embed_timeseries(water_consumption, 5)
+#' train <- embed_timeseries(water_consumption, 5)[1:500,]
 #'
 #' model <- DETS(target ~., train, specs, lambda = 30, omega = .2)
 #'
@@ -947,6 +967,11 @@ setClass("DETS",
 #' model is the one that has the lowest loss prediction from
 #' the meta models. Defaults to FALSE;
 #'
+#' @param num_cores A numeric value to specify the number of cores used to
+#' train base and meta models. num_cores = 1
+#' leads to sequential training of models. num_cores > 1
+#' splits the training of the base models across num_cores cores.
+#'
 #' @references Cerqueira, Vitor; Torgo, Luis; Oliveira, Mariana,
 #' and Bernhard Pfahringer. "Dynamic and Heterogeneous Ensembles
 #' for Time Series Forecasting." Data Science and Advanced
@@ -982,9 +1007,10 @@ setClass("DETS",
            specs,
            lambda = 50,
            omega = .5,
-           select_best = FALSE) {
+           select_best = FALSE,
+           num_cores=1) {
 
-    M <- build_base_ensemble(form, data, specs)
+    M <- build_base_ensemble(form, data, specs, num_cores)
 
     recent_lambda_k <- recent_lambda_observations(data, lambda)
 

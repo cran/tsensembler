@@ -39,6 +39,24 @@ compute_predictions <-
           "mvr" = {
             predict_pls_pcr(M[[bm]], data)
           },
+          "arima" = {
+            arima_predict(M[[bm]], data)
+          },
+          "ets" = {
+            ets_predict(M[[bm]], data)
+          },
+          "tbats" = {
+            tbats_predict(M[[bm]], data)
+          },
+          "xgb" = {
+            xgb_predict(M[[bm]], data)
+          },
+          #"lstm" = {
+          #  predict_lstm(M[[bm]], data)
+          #},
+          #"deepffnn" = {
+          #  predict_deepffnn(M[[bm]], data)
+          #},
           "glm" = {
             X_bm <- M[[bm]]$beta@Dimnames[[1]]
             data <- data[colnames(data) %in% c(target_var, X_bm)]

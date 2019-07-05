@@ -47,8 +47,8 @@
 #'   model <- update_weights(model, test[i, ])
 #' }
 #'
-#' all.equal(predictions1, predictions)
-#' 
+#' #all.equal(predictions1, predictions)
+#'
 #'
 #' @export
 setGeneric("update_weights",
@@ -77,6 +77,7 @@ setMethod("update_weights",
 
             object
           })
+
 
 #' @rdname update_weights
 setMethod("update_weights",

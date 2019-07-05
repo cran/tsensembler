@@ -179,7 +179,11 @@ normalize <-
       stop("x must be numeric.")
     if (length(x) == 1L)
       return(1.)
-    if (stats::var(x, na.rm = T) == 0)
+
+    var_x <- stats::var(x, na.rm = T)
+    if (is.na(var_x)) var_x <- 0
+
+    if (var_x == 0)
       return(x)
 
     (x - min(x, ...)) / (max(x, ...) - min(x, ...))
@@ -210,7 +214,11 @@ proportion <-
       x <- unlist(x)
     if (length(x) == 1L)
       return(1)
-    if (stats::var(x, na.rm = T) == 0)
+
+    var_x <- stats::var(x, na.rm = T)
+    if (is.na(var_x)) var_x <- 0
+
+    if (var_x == 0)
       return(rep(1 / length(x), times = length(x)))
 
     x / sum(x, na.rm = T)
@@ -373,7 +381,7 @@ are_pars_valid <-
                c("kernel", "C", "epsilon")
              },
              "bm_glm" = {
-               c("alpha")
+               c("alpha","family")
              },
              "bm_gbm" = {
                c("interaction.depth", "shrinkage", "n.trees","dist")
@@ -390,11 +398,23 @@ are_pars_valid <-
              "bm_mars" = {
                c("nk", "thresh", "degree")
              },
+             "bm_timeseries" = {
+               c("model")
+             },
              "bm_gaussianprocess" = {
                c("kernel", "tol")
              },
+             "bm_deepffnn" = {
+               c("num_epochs", "nunits")
+             },
+             "bm_lstm" = {
+               c("num_epochs", "nunits")
+             },
              "bm_pls_pcr" = {
                c("method")
+             },
+             "bm_xgb" = {
+               c("max_depth","eta","nrounds")
              },
              "bm_ppr" = {
                c("nterms", "sm.method")
