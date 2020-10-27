@@ -19,10 +19,12 @@ This function extracts the top learners at each test point
 from a score matrix, according to the committee ratio \strong{omega}.
 }
 \seealso{
-Other weighting base models: \code{\link{EMASE}},
-  \code{\link{build_committee}},
-  \code{\link{model_recent_performance}},
-  \code{\link{model_weighting}}, \code{\link{select_best}}
+Other weighting base models: 
+\code{\link{EMASE}()},
+\code{\link{build_committee}()},
+\code{\link{model_recent_performance}()},
+\code{\link{model_weighting}()},
+\code{\link{select_best}()}
 }
 \concept{weighting base models}
 \keyword{internal}

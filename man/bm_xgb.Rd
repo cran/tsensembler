@@ -2,18 +2,18 @@
 % Please edit documentation in R/base-model-xgb.r
 \name{bm_xgb}
 \alias{bm_xgb}
-\title{xgb base model}
+\title{Base model for XGBoost}
 \usage{
 bm_xgb(form, data, lpars)
 }
 \arguments{
 \item{form}{formula}
 
-\item{data}{training data}
+\item{data}{Training data}
 
-\item{lpars}{learning parameters}
+\item{lpars}{list of parameters--deprecated}
 }
 \description{
-xgb base model
+Base model for XGBoost
 }
 \keyword{internal}

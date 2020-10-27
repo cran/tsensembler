@@ -30,11 +30,16 @@ other learning models: \code{\link{bm_mars}};
 \code{\link{bm_randomforest}}; \code{\link{bm_pls_pcr}};
 \code{\link{bm_ffnn}}; \code{\link{bm_svr}}
 
-Other base learning models: \code{\link{bm_cubist}},
-  \code{\link{bm_ffnn}}, \code{\link{bm_gaussianprocess}},
-  \code{\link{bm_gbm}}, \code{\link{bm_mars}},
-  \code{\link{bm_pls_pcr}}, \code{\link{bm_ppr}},
-  \code{\link{bm_randomforest}}, \code{\link{bm_svr}}
+Other base learning models: 
+\code{\link{bm_cubist}()},
+\code{\link{bm_ffnn}()},
+\code{\link{bm_gaussianprocess}()},
+\code{\link{bm_gbm}()},
+\code{\link{bm_mars}()},
+\code{\link{bm_pls_pcr}()},
+\code{\link{bm_ppr}()},
+\code{\link{bm_randomforest}()},
+\code{\link{bm_svr}()}
 }
 \concept{base learning models}
 \keyword{internal}

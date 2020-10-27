@@ -4,7 +4,7 @@
 \alias{se}
 \title{Computing the squared error}
 \usage{
-se(y, y_hat, ...)
+se(y, y_hat)
 }
 \arguments{
 \item{y}{A numeric vector representing the actual values.}
@@ -18,8 +18,9 @@ squared error of forecasted values.
 Utility function to compute pointwise squared error (SE)
 }
 \seealso{
-Other error/performance functions: \code{\link{ae}},
-  \code{\link{mse}}
+Other error/performance functions: 
+\code{\link{ae}()},
+\code{\link{mse}()}
 }
 \concept{error/performance functions}
 \keyword{internal}

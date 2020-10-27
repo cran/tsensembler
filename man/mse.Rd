@@ -15,8 +15,9 @@ mse(y, y_hat)
 Utility function to compute mean squared error (MSE)
 }
 \seealso{
-Other error/performance functions: \code{\link{ae}},
-  \code{\link{se}}
+Other error/performance functions: 
+\code{\link{ae}()},
+\code{\link{se}()}
 }
 \concept{error/performance functions}
 \keyword{internal}

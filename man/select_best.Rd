@@ -16,11 +16,12 @@ For each row (data point), the model with maximum weight is assigned
 a weight of 1, while the remaining models are assigned a weight of 0.
 }
 \seealso{
-Other weighting base models: \code{\link{EMASE}},
-  \code{\link{build_committee}},
-  \code{\link{get_top_models}},
-  \code{\link{model_recent_performance}},
-  \code{\link{model_weighting}}
+Other weighting base models: 
+\code{\link{EMASE}()},
+\code{\link{build_committee}()},
+\code{\link{get_top_models}()},
+\code{\link{model_recent_performance}()},
+\code{\link{model_weighting}()}
 }
 \concept{weighting base models}
 \keyword{internal}

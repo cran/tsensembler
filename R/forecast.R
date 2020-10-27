@@ -26,11 +26,15 @@ compute_predictions <-
 
     mnames_raw <- names(M)
     mnames <-
-      vcapply(mnames_raw, function(o)
-        split_by_(o)[1])
+      vapply(mnames_raw,
+             function(o) {
+               split_by_(o)[1]
+             }, character(1), USE.NAMES = FALSE)
 
     Y_hat <- list()
+    time_cost <- c()
     for (bm in seq_along(M)) {
+      t0 <- Sys.time()
       Y_hat[[bm]] <-
         switch(
           mnames[bm],
@@ -39,24 +43,13 @@ compute_predictions <-
           "mvr" = {
             predict_pls_pcr(M[[bm]], data)
           },
-          "arima" = {
-            arima_predict(M[[bm]], data)
-          },
-          "ets" = {
-            ets_predict(M[[bm]], data)
-          },
-          "tbats" = {
-            tbats_predict(M[[bm]], data)
+          "nnet" = {
+            newX <- as.matrix(stats::model.matrix(form, data))
+            monmlp.predict(newX, M[[bm]])[,1]
           },
           "xgb" = {
             xgb_predict(M[[bm]], data)
           },
-          #"lstm" = {
-          #  predict_lstm(M[[bm]], data)
-          #},
-          #"deepffnn" = {
-          #  predict_deepffnn(M[[bm]], data)
-          #},
           "glm" = {
             X_bm <- M[[bm]]$beta@Dimnames[[1]]
             data <- data[colnames(data) %in% c(target_var, X_bm)]
@@ -64,10 +57,24 @@ compute_predictions <-
 
             predict.glmnet(M[[bm]], data_bm, type = "response")
           },
+
+          "cub" = {
+            data_bm <- stats::model.matrix(form, data)
+            predict(M[[bm]], data_bm, neighbors=M[[bm]]$neighbors)
+          },
           predict(M[[bm]], data)
         )
+
+      t1 <- Sys.time()
+      dt <- difftime(t1,t0, units="secs")
+      dt <- round(as.vector(dt),5)
+
+      time_cost <- c(time_cost,dt)
     }
     names(Y_hat) <- mnames_raw
+    names(time_cost) <- mnames_raw
+
+    attr(Y_hat, "Times") <- time_cost
 
     Y_hat
   }
@@ -106,20 +113,20 @@ combine_predictions <-
     seq. <- seq_len(nrow(Y_hat))
     if (!is.null(committee))
       y_hat <-
-        vnapply(seq.,
+        vapply(seq.,
                 function(j) {
                   Y_hat_j <- Y_hat[j, committee[[j]]]
                   W_j <- proportion(W[j, committee[[j]]])
                   sum(Y_hat_j * W_j)
-                })
+                }, numeric(1), USE.NAMES = FALSE)
     else
       y_hat <-
-        vnapply(seq.,
+        vapply(seq.,
                 function(j) {
                   Y_hat_j <- Y_hat[j, ]
                   W_j <- proportion(W[j, ])
                   sum(Y_hat_j * W_j)
-                })
+                }, numeric(1), USE.NAMES = FALSE)
 
     y_hat
   }

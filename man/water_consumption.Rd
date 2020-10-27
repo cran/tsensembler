@@ -4,11 +4,13 @@
 \name{water_consumption}
 \alias{water_consumption}
 \title{Water Consumption in Oporto city (Portugal) area.}
-\format{The time series has 1741 values from Jan, 2012 to Oct,
+\format{
+The time series has 1741 values from Jan, 2012 to Oct,
 2016 in a daily granularity.
 \describe{
   \item{consumption}{consumption of water, raw value from sensor}
-}}
+}
+}
 \source{
 \url{https://www.addp.pt/home.php}
 }

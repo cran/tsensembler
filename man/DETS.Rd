@@ -4,8 +4,15 @@
 \alias{DETS}
 \title{Dynamic Ensemble for Time Series}
 \usage{
-DETS(form, data, specs, lambda = 50, omega = 0.5,
-  select_best = FALSE, num_cores = 1)
+DETS(
+  form,
+  data,
+  specs,
+  lambda = 50,
+  omega = 0.5,
+  select_best = FALSE,
+  num_cores = 1
+)
 }
 \arguments{
 \item{form}{formula;}
@@ -84,8 +91,7 @@ Analytics (DSAA), 2017 IEEE International Conference on. IEEE, 2017.
 }
 \seealso{
 \code{\link{model_specs-class}} for setting up the ensemble parameters
-for an \strong{DETS} model; \code{\link{forecast}} for the method
-that uses an \strong{DETS} model for forecasting future values;
+for an \strong{DETS} model;
 \code{\link{predict}} for the method that predicts new held out observations;
 \code{\link{update_weights}} for the method used to update the
 weights of an \strong{DETS} model between successive predict or forecast calls;

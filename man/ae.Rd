@@ -4,7 +4,7 @@
 \alias{ae}
 \title{Computing the absolute error}
 \usage{
-ae(y, y_hat, ...)
+ae(y, y_hat)
 }
 \arguments{
 \item{y}{A numeric vector representing the actual values.}
@@ -15,8 +15,9 @@ ae(y, y_hat, ...)
 Element-wise computation of the absolute error loss function.
 }
 \seealso{
-Other error/performance functions: \code{\link{mse}},
-  \code{\link{se}}
+Other error/performance functions: 
+\code{\link{mse}()},
+\code{\link{se}()}
 }
 \concept{error/performance functions}
 \keyword{internal}

@@ -35,7 +35,8 @@ A list containing two objects:
 A pipeline for retrieving out-of-bag loss estimations
 }
 \seealso{
-Other out-of-bag functions: \code{\link{intraining_predictions}}
+Other out-of-bag functions: 
+\code{\link{intraining_predictions}()}
 }
 \concept{out-of-bag functions}
 \keyword{internal}

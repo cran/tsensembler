@@ -4,13 +4,10 @@
 \alias{proportion}
 \title{Computing the proportions of a numeric vector}
 \usage{
-proportion(x, ...)
+proportion(x)
 }
 \arguments{
 \item{x}{a numeric vector;}
-
-\item{...}{Further arguments to \code{var} and \code{sum}
-function (e.g. na.rm = TRUE)}
 }
 \value{
 A vector of proportions

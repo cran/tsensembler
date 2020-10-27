@@ -21,7 +21,8 @@ A pipeline for retrieving out-of-bag predictions
 from the base models
 }
 \seealso{
-Other out-of-bag functions: \code{\link{intraining_estimations}}
+Other out-of-bag functions: 
+\code{\link{intraining_estimations}()}
 }
 \concept{out-of-bag functions}
 \keyword{internal}

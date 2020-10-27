@@ -149,8 +149,6 @@ setMethod("predict",
             seq. <- seq_len(nrow(newdata))
 
             Y_hat <- predict(object@base_ensemble, newdata)
-            #Y_hat <-
-            #  dual_perturb_combine(object@base_ensemble, newdata, 200)
 
             Y <- get_y(newdata, object@form)
 
@@ -216,11 +214,16 @@ setMethod("predict",
                                            newdata)
                      })
 
+            Times <- sapply(Y_hat, attr, "Times")
+
             Y_hat <- unlist(Y_hat, recursive = FALSE)
             nmodels <- names(Y_hat)
 
             Y_hat <- as.data.frame(Y_hat)
             colnames(Y_hat) <- nmodels
 
+            attr(Y_hat, "Times") <- Times
+
             Y_hat
           })
+

@@ -33,9 +33,11 @@ Average Squared Error, to quantify the recent
 performance of the base models.
 }
 \seealso{
-Other weighting base models: \code{\link{EMASE}},
-  \code{\link{build_committee}},
-  \code{\link{get_top_models}},
-  \code{\link{model_weighting}}, \code{\link{select_best}}
+Other weighting base models: 
+\code{\link{EMASE}()},
+\code{\link{build_committee}()},
+\code{\link{get_top_models}()},
+\code{\link{model_weighting}()},
+\code{\link{select_best}()}
 }
 \concept{weighting base models}

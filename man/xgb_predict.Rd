@@ -2,16 +2,16 @@
 % Please edit documentation in R/base-model-xgb.r
 \name{xgb_predict}
 \alias{xgb_predict}
-\title{xgb predict fun}
+\title{XGBoost predict function}
 \usage{
 xgb_predict(model, newdata)
 }
 \arguments{
-\item{model}{model from bm_xgb}
+\item{model}{Model from bm_xgb}
 
-\item{newdata}{newdata}
+\item{newdata}{Test data}
 }
 \description{
-xgb predict fun
+XGBoost predict function
 }
 \keyword{internal}

@@ -38,10 +38,11 @@ These tranformations culminate into the
 final weights of the models.
 }
 \seealso{
-Other weighting base models: \code{\link{EMASE}},
-  \code{\link{build_committee}},
-  \code{\link{get_top_models}},
-  \code{\link{model_recent_performance}},
-  \code{\link{select_best}}
+Other weighting base models: 
+\code{\link{EMASE}()},
+\code{\link{build_committee}()},
+\code{\link{get_top_models}()},
+\code{\link{model_recent_performance}()},
+\code{\link{select_best}()}
 }
 \concept{weighting base models}

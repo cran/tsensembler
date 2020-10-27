@@ -4,13 +4,10 @@
 \alias{normalize}
 \title{Scale a numeric vector using max-min}
 \usage{
-normalize(x, ...)
+normalize(x)
 }
 \arguments{
 \item{x}{a numeric vector.}
-
-\item{...}{Further arguments to min and max function
-(e.g. na.rm = TRUE)}
 }
 \value{
 a linearly normalized vector
@@ -21,7 +18,6 @@ Utility function used to linearly normalize a numeric vector
 \examples{
 normalize(rnorm(4L))
 normalize(1:10)
-normalize(c(1,2,NA,4), na.rm = TRUE)
 
 }
 \keyword{internal}

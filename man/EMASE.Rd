@@ -25,10 +25,12 @@ performance of each base learner and adapt the combined
 model accordingly.
 }
 \seealso{
-Other weighting base models: \code{\link{build_committee}},
-  \code{\link{get_top_models}},
-  \code{\link{model_recent_performance}},
-  \code{\link{model_weighting}}, \code{\link{select_best}}
+Other weighting base models: 
+\code{\link{build_committee}()},
+\code{\link{get_top_models}()},
+\code{\link{model_recent_performance}()},
+\code{\link{model_weighting}()},
+\code{\link{select_best}()}
 }
 \concept{weighting base models}
 \keyword{internal}

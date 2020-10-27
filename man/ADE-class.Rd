@@ -107,8 +107,7 @@ Artificial Neural Networks. Springer, Cham, 2017, pp. 720–732
 }
 \seealso{
 \code{\link{model_specs-class}} for setting up the ensemble parameters
-for an \strong{ADE} model; \code{\link{forecast}} for the forecasting method
-that uses an \strong{ADE} model for forecasting future values;
+for an \strong{ADE} model;
 \code{\link{predict}} for the method that predicts new held out observations;
 \code{\link{update_weights}} for the method used to update the
 weights of an \strong{ADE} model between successive predict or forecast calls;

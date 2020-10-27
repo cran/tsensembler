@@ -31,8 +31,10 @@ by each meta-model.
 \seealso{
 \code{\link{ADE-class}} for generating an ADE ensemble.
 
-Other ensemble predictions: \code{\link{ade_hat-class}},
-  \code{\link{dets_hat-class}}, \code{\link{dets_hat}}
+Other ensemble predictions: 
+\code{\link{ade_hat-class}},
+\code{\link{dets_hat-class}},
+\code{\link{dets_hat}}
 }
 \concept{ensemble predictions}
 \keyword{internal}

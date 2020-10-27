@@ -83,10 +83,11 @@ learning_base_models <-
       `%partrain%` <- `%do%`
     }
 
-    o<-NULL
+    o <- NULL
     base_model <-
       foreach::foreach(o = seq_along(learner),
                        .packages = "tsensembler") %partrain% {
+                         cat("\n\n",learner[o],"\n")
 
                          do.call(learner[o], c(list(form, train, lpars)))
                        }
@@ -100,8 +101,9 @@ learning_base_models <-
     base_model <- unlist(base_model, recursive = FALSE)
     pre_weights  <- unlist(pre_weights, recursive = FALSE)
 
-    W <- vnapply(pre_weights,
-                 function(o) mse(Y_tr, o))
+    W <- vapply(pre_weights, function(o) {
+      rmse(Y_tr, o)
+    }, numeric(1), USE.NAMES = FALSE)
     W <- model_weighting(W, trans = "linear")
 
     list(base_model = base_model, preweights = W)
